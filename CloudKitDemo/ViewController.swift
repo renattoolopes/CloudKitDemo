@@ -15,21 +15,33 @@ class ViewController:
     UITableViewDataSource,
     UIImagePickerControllerDelegate,
     UINavigationControllerDelegate{
+    
+ 
+    @IBOutlet weak var textName: UITextField!
+    @IBOutlet weak var textType: UITextField!
+    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var imageView: UIImageView!
+
     let imgPick = UIImagePickerController()
     var imageURL: URL? = nil
-    
-    @IBOutlet weak var imageView: UIImageView!
-    
-    @IBAction func refreshTable(_ sender: Any) {
+    let container: CKContainer = CKContainer.default()
+    var privateDB: CKDatabase = CKContainer.default().privateCloudDatabase
+    var listPlayers: [Player] = []
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        self.imgPick.delegate = self as UIImagePickerControllerDelegate & UINavigationControllerDelegate
+        tableView.delegate = self
+        tableView.dataSource = self
         self.getListPlayers()
     }
-    
-    @IBAction func btnImage(_ sender: Any) {
-        imgPick.allowsEditing = false
-        imgPick.sourceType = .photoLibrary
-        self.present(imgPick, animated: true, completion: nil)
-        
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
     }
+    
+    
+    
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
         if let picked = info[UIImagePickerControllerOriginalImage] as! UIImage?{
             imageView.contentMode = .scaleToFill
@@ -41,27 +53,7 @@ class ViewController:
         dismiss(animated: true, completion: nil)
     }
     
-    @IBOutlet weak var textName: UITextField!
-    @IBOutlet weak var textType: UITextField!
 
-    @IBOutlet weak var tableView: UITableView!
-    
-    let container: CKContainer = CKContainer.default()
-    var privateDB: CKDatabase = CKContainer.default().privateCloudDatabase
-    
-    var listPlayers: [Player] = []
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        self.imgPick.delegate = self as? UIImagePickerControllerDelegate & UINavigationControllerDelegate
-        tableView.delegate = self
-        tableView.dataSource = self
-    }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-    }
-    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         //retorna o total de registros que tem no array de players
         if listPlayers.count > 0 {
@@ -136,6 +128,16 @@ class ViewController:
         
     }
     
+    @IBAction func refreshTable(_ sender: Any) {
+        self.getListPlayers()
+    }
+    
+    @IBAction func btnImage(_ sender: Any) {
+        imgPick.allowsEditing = false
+        imgPick.sourceType = .photoLibrary
+        self.present(imgPick, animated: true, completion: nil)
+        
+    }
     
     
 }
