@@ -9,9 +9,38 @@
 import UIKit
 import CloudKit
 
-class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource {
+class ViewController:
+    UIViewController,
+    UITableViewDelegate,
+    UITableViewDataSource,
+    UIImagePickerControllerDelegate,
+    UINavigationControllerDelegate{
+    let imgPick = UIImagePickerController()
+    var imageURL: URL? = nil
     
-
+    @IBOutlet weak var imageView: UIImageView!
+    
+    @IBAction func refreshTable(_ sender: Any) {
+        self.getListPlayers()
+    }
+    
+    @IBAction func btnImage(_ sender: Any) {
+        imgPick.allowsEditing = false
+        imgPick.sourceType = .photoLibrary
+        self.present(imgPick, animated: true, completion: nil)
+        
+    }
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+        if let picked = info[UIImagePickerControllerOriginalImage] as! UIImage?{
+            imageView.contentMode = .scaleToFill
+            imageView.image = picked
+        }
+        
+        let imgUrl = info[UIImagePickerControllerImageURL] as? URL
+        imageURL = imgUrl!
+        dismiss(animated: true, completion: nil)
+    }
+    
     @IBOutlet weak var textName: UITextField!
     @IBOutlet weak var textType: UITextField!
 
@@ -24,7 +53,7 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        getListPlayers()
+        self.imgPick.delegate = self as? UIImagePickerControllerDelegate & UINavigationControllerDelegate
         tableView.delegate = self
         tableView.dataSource = self
     }
@@ -44,15 +73,11 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if !listPlayers.isEmpty
         {
-//            let cell = self.tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-
             let cell = UITableViewCell()
-            print(indexPath.row)
-            print(listPlayers[indexPath.row].nick!)
             cell.textLabel?.text = listPlayers[indexPath.row].nick!
             return cell
         }
-        
+
         return UITableViewCell()
     }
     
@@ -66,18 +91,18 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
                 //imprimir retorno do erro, obrigatorio ter um return
                 return print(error?.localizedDescription ?? "ERROR IN CLOUDKIT - Players")
             }
-            
+            self.listPlayers = []
+
             records?.forEach({ (record) in
                 let nickPlayer = record.value(forKey: "nick")
                 let typePlayer = record.value(forKey: "typePlayer")
-                
                 if typePlayer != nil && nickPlayer != nil {
                     let player = Player(nick: nickPlayer! as! String, type: typePlayer! as! String)
+                    
                     self.listPlayers.append(player)
                 }
-                
-  
             })
+            print(self.listPlayers)
             OperationQueue.main.addOperation({
                 self.tableView.reloadData()
                 self.tableView.isHidden = false
@@ -88,16 +113,27 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
         if !(textType.text?.isEmpty)! && !(textName.text?.isEmpty)!{
             let player = Player(nick: textName.text!, type: textType.text!)
             let record = CKRecord(recordType: "Players")
-            
+        
             record.setValue(player.nick!, forKey: "nick")
             record.setValue(player.typePlayer, forKey: "typePlayer")
+            record.setValue(CKAsset(fileURL: imageURL!), forKey: "photo")
+            
             privateDB.save(record) { (record, error) in
+                
                 guard error == nil else{
-                    return print(error?.localizedDescription ?? "ERROE")
+                    print("error")
+                    return print(error?.localizedDescription ?? "ERROR")
                 }
-                self.getListPlayers()
+                OperationQueue.main.addOperation({
+                    print("Reload")
+                    self.getListPlayers()
+                    self.tableView.isHidden = false
+                })
             }
         }
+        
+        
+        
     }
     
     
