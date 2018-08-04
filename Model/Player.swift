@@ -10,13 +10,13 @@ import Foundation
 import UIKit
 
 class Player {
-    let nick: String?
-    let typePlayer: String?
+    let name: String?
+    let type: String?
     let photo: URL
     
-    init(nick: String, type: String, photo: URL) {
-        self.nick = nick
-        self.typePlayer = type
+    init(name: String, type: String, photo: URL) {
+        self.name = name
+        self.type = type
         self.photo = photo
     }
     

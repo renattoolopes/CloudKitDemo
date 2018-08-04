@@ -31,12 +31,15 @@ class ViewController:
     override func viewDidLoad() {
         super.viewDidLoad()
         self.imgPick.delegate = self as UIImagePickerControllerDelegate & UINavigationControllerDelegate
+        imageView.layer.cornerRadius = 10.00
+        imageView.layer.borderWidth = 3.0
+        imageView.layer.borderColor = #colorLiteral(red: 0.2549019754, green: 0.2745098174, blue: 0.3019607961, alpha: 1)
         tableView.delegate = self
         tableView.dataSource = self
         self.getListPlayers()
         
         self.tableView.register(CellCustom.self, forCellReuseIdentifier: "custom")
-        self.tableView.rowHeight = 27
+        self.tableView.rowHeight = UITableViewAutomaticDimension
 //        self.tableView.estimatedRowHeight = 100
     }
 
@@ -70,7 +73,7 @@ class ViewController:
         if !listPlayers.isEmpty
         {
 //            let cell = UITableViewCell()
-            customCell.message = listPlayers[indexPath.row].nick!
+            customCell.message = listPlayers[indexPath.row].name!
             customCell.mainImage = convertURL(url: listPlayers[indexPath.row].photo)
             return customCell
         }else{
@@ -108,13 +111,13 @@ class ViewController:
             self.listPlayers = []
 
             records?.forEach({ (record) in
-                let nickPlayer = record.value(forKey: "nick")
-                let typePlayer = record.value(forKey: "typePlayer")
+                let name = record.value(forKey: "name")
+                let typePlayer = record.value(forKey: "type")
                 let photoPlayer = record.value(forKey: "photo")
                 let url  = photoPlayer as! CKAsset
                 
-                if typePlayer != nil && nickPlayer != nil {
-                    let player = Player(nick: nickPlayer! as! String, type: typePlayer! as! String, photo: url.fileURL )
+                if typePlayer != nil && name != nil {
+                    let player = Player(name: name! as! String, type: typePlayer! as! String, photo: url.fileURL )
                     
                     self.listPlayers.append(player)
                 }
@@ -128,11 +131,11 @@ class ViewController:
     
     @IBAction func btnSavePlayer(_ sender: Any) {
         if !(textType.text?.isEmpty)! && !(textName.text?.isEmpty)!{
-            let player = Player(nick: textName.text!, type: textType.text!,photo: imageURL!)
+            let player = Player(name: textName.text!, type: textType.text!,photo: imageURL!)
             let record = CKRecord(recordType: "Players")
 
-            record.setValue(player.nick!, forKey: "nick")
-            record.setValue(player.typePlayer, forKey: "typePlayer")
+            record.setValue(player.name!, forKey: "name")
+            record.setValue(player.type, forKey: "type")
             record.setValue(CKAsset(fileURL: imageURL!), forKey: "photo")
 
             privateDB.save(record) { (record, error) in
@@ -142,7 +145,7 @@ class ViewController:
                     return print(error?.localizedDescription ?? "ERROR")
                 }
                 OperationQueue.main.addOperation({
-                    print("Reload")
+                    self.clearFilds()
                     self.getListPlayers()
                     self.tableView.isHidden = false
                 })
@@ -164,6 +167,11 @@ class ViewController:
         
     }
     
+    func clearFilds(){
+        textName.text = nil
+        textType.text = nil
+        imageView.image = nil
+    }
     
 }
 
