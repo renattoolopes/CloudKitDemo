@@ -36,13 +36,13 @@ class ViewController:
         self.getListPlayers()
         
         self.tableView.register(CellCustom.self, forCellReuseIdentifier: "custom")
+        self.tableView.rowHeight = 27
+//        self.tableView.estimatedRowHeight = 100
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
     }
-    
-    
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
         if let picked = info[UIImagePickerControllerOriginalImage] as! UIImage?{
@@ -73,9 +73,13 @@ class ViewController:
             customCell.message = listPlayers[indexPath.row].nick!
             customCell.mainImage = convertURL(url: listPlayers[indexPath.row].photo)
             return customCell
-        }
+        }else{
+            customCell.mainImage = UIImage()
+            customCell.message = ""
+            return customCell
 
-        return customCell
+        }
+        
     }
     func convertURL(url: URL) -> UIImage{
         var data: Data
@@ -87,7 +91,8 @@ class ViewController:
         }catch{
             print("Deu zica")
         }
-        imageView.image = image
+        
+        
         return image
     }
     
@@ -114,13 +119,13 @@ class ViewController:
                     self.listPlayers.append(player)
                 }
             })
-            print(self.listPlayers[0].photo)
             OperationQueue.main.addOperation({
                 self.tableView.reloadData()
                 self.tableView.isHidden = false
             })
         }
     }
+    
     @IBAction func btnSavePlayer(_ sender: Any) {
         if !(textType.text?.isEmpty)! && !(textName.text?.isEmpty)!{
             let player = Player(nick: textName.text!, type: textType.text!,photo: imageURL!)

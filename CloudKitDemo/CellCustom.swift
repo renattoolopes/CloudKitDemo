@@ -32,6 +32,7 @@ class CellCustom: UITableViewCell {
         
         super.addSubview(messageView)
         super.addSubview(mainImageView)
+        adjustAnchorPositon()
         
         
         
@@ -39,10 +40,11 @@ class CellCustom: UITableViewCell {
     
     func adjustAnchorPositon(){
         // Ajuste da ImageView
-        mainImageView.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
+//        mainImageView.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
         mainImageView.leftAnchor.constraint(equalTo: self.leftAnchor).isActive = true
-        mainImageView.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
-        mainImageView.widthAnchor.constraint(equalTo: self.heightAnchor).isActive = true
+//        mainImageView.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
+        mainImageView.widthAnchor.constraint(equalToConstant: 50).isActive = true
+        mainImageView.heightAnchor.constraint(equalToConstant: 50).isActive = true
         
         
         //Ajuste do TextView
@@ -56,7 +58,6 @@ class CellCustom: UITableViewCell {
     override func layoutSubviews() {
         if let img = mainImage {
             mainImageView.image = img
-            
         }
         
         if let msg = message {
